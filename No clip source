@@ -1,0 +1,58 @@
+only for my base can be used to reverse engineer
+
+
+
+
+
+
+    bool NoClip = false;
+    void noclip(bool toggle)
+    {
+        if (toggle)
+        {
+            auto ped = PLAYER::PLAYER_PED_ID();
+            Vector3 xyzcoords = ENTITY::GET_ENTITY_COORDS(ped, true);
+            auto heading = CAM::GET_GAMEPLAY_CAM_RELATIVE_HEADING() + ENTITY::GET_ENTITY_HEADING(ped);
+            auto pitch = CAM::GET_GAMEPLAY_CAM_RELATIVE_PITCH();
+
+            auto speed = 1.0f;
+
+            auto xm = -sin(heading * M_PI / 180.0);
+            auto ym = cos(heading * M_PI / 180.0);
+            auto zm = sin(pitch * M_PI / 180.0);
+
+            auto len = sqrt(xm * xm + ym * ym + zm * zm);
+            if (len != 0) {
+                xm = xm / len;
+                ym = ym / len;
+                zm = zm / len;
+            }
+
+            auto x = xyzcoords.x;
+            auto y = xyzcoords.y;
+            auto z = xyzcoords.z;
+
+            ENTITY::SET_ENTITY_VELOCITY(ped, 0.0001, 0.0001, 0.0001);
+            if (GetAsyncKeyState(VK_SHIFT) || CONTROLS::IS_DISABLED_CONTROL_JUST_PRESSED(2, 21)) {
+                speed = speed + 3;
+            }
+            if (GetAsyncKeyState(0x43) || CONTROLS::IS_DISABLED_CONTROL_JUST_PRESSED(2, 19)) {
+                speed = speed - 0.5;
+            }
+
+            //forward
+            if (GetAsyncKeyState(0x57)) {
+                x = x + speed * xm;
+                y = y + speed * ym;
+                z = z + speed * zm;
+            }
+            //backward
+            if (GetAsyncKeyState(0x53)) {
+                x = x - speed * xm;
+                y = y - speed * ym;
+                z = z - speed * zm;
+            }
+
+            ENTITY::SET_ENTITY_COORDS_NO_OFFSET(ped, x, y, z, true, true, true);
+        }
+    }
